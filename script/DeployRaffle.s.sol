@@ -9,8 +9,8 @@ contract DeployRaffle is Script {
     function run() public {}
 
     function deployContract() public returns (Raffle , HelperConfig) {
-        HelperConfig config = new HelperConfig();
-        HelperComfig.NetworkConfig memory config = HelperConfig.getConfig();
+        HelperConfig Config = new HelperConfig();
+        HelperConfig.NetworkConfig memory config = Config.getConfig();
         vm.startBroadcast();
         Raffle raffle = new Raffle(
             config.entranceFee,
@@ -21,6 +21,6 @@ contract DeployRaffle is Script {
             config.callbackGasLimit
         );
         vm.stopBroadcast();
-        return (raffle, config);        
+        return (raffle, Config);        
     }
 }

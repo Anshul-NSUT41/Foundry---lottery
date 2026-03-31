@@ -167,4 +167,10 @@ contract Raffle is VRFConsumerBaseV2Plus {
         }
         emit WinnerPicked(s_recentWinner);
     }
+
+    /** Getter functions */
+    function getRaffleState() public view returns (RaffleState) {
+        return s_raffleState;
+    }
+
 }
