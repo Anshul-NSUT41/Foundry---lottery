@@ -34,7 +34,7 @@ contract HelperConfig is Script {
         networkConfigs[ETH_SEPOLIA_CHAIN_ID] = getSepoliaEthConfig();
     }
 
-    function getComfigByChainId(uint256 chainId) public view returns (NetworkConfig){
+    function getConfigByChainId(uint256 chainId) public view returns (NetworkConfig){
         if(networkConfigs[chainId].vrfCoordinator != address(0)){
             return networkConfigs[chainId] ;
         }
@@ -45,7 +45,11 @@ contract HelperConfig is Script {
             revert HelperConfig__InvalidChainId();
         }
     }
-   
+    
+    function getConfig() public view returns (NetworkConfig memory){
+        return getConfigByChainId(block.chainid);
+    }
+
     function getSepoliaEthConfig() public pure returns (NetworkConfig){
         NetworkConfig sepoliaNetworkConfig = NetworkConfig({
             subscriptionId: 0, // If left as 0, our scripts will create one!

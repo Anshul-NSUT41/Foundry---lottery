@@ -8,5 +8,19 @@ import {HelperConfig} from "script/HelperConfig.s.sol";
 contract DeployRaffle is Script {
     function run() public {}
 
-    function deployContract() public returns (Raffle) {}
+    function deployContract() public returns (Raffle , HelperConfig) {
+        HelperConfig config = new HelperConfig();
+        HelperComfig.NetworkConfig memory config = HelperConfig.getConfig();
+        vm.startBroadcast();
+        Raffle raffle = new Raffle(
+            config.entranceFee,
+            config.interval,
+            config.vrfCoordinator,
+            config.gasLane,
+            config.subscriptionId,
+            config.callbackGasLimit
+        );
+        vm.stopBroadcast();
+        return (raffle, config);        
+    }
 }
