@@ -20,6 +20,9 @@ contract RaffleTest is Test {
     uint256 subscriptionId;
     uint32 callbackGasLimit;
 
+    event RaffleEntered(address indexed player);
+    event WinnerPicked(address indexed winner);
+
     function setUp() external {
         DeployRaffle deployer = new DeployRaffle();
         (raffle, helperConfig) = deployer.deployContract();
@@ -30,11 +33,45 @@ contract RaffleTest is Test {
         gasLane = config.gasLane;
         subscriptionId = config.subscriptionId;
         callbackGasLimit = config.callbackGasLimit;
+
+        vm.deal(PLAYER, STARTING_PLAYER_BALANCE);
     }
 
     /** Lottery shud start as open */
-    function testRaffleInitializesInOpenState() external {
+    function testRaffleInitializesInOpenState() external view {
         assert(raffle.getRaffleState() == Raffle.RaffleState.OPEN);
     }
+   
+    function testRaffleReverts() external {
+        vm.prank(PLAYER);
+        vm.expectRevert(Raffle.Raffle__SendMoreToEnterRaffle.selector);
+        raffle.enterRaffle();
+    }
 
+    function testRaffleRecordsPlayerWhenTheyEnter() external {
+        vm.prank(PLAYER);
+        raffle.enterRaffle{value: entranceFee}();
+        address playerRecorded = raffle.getPlayer(0);
+        assert(playerRecorded == PLAYER);
+    }
+
+    function testRaffleEmitsEventOnEnter() external {
+        vm.prank(PLAYER); 
+    /** for 1 indexed event , there is true , there is no other indexed and non indexed parameters*/
+        vm.expectEmit(true, false, false, false, address(raffle));
+        emit RaffleEntered(PLAYER);
+        raffle.enterRaffle{value: entranceFee}();
+    }
+
+    function testDontAllowEntranceWhenRaffleIsCalculating() external {
+        vm.prank(PLAYER);
+        raffle.enterRaffle{value : entranceFee}();
+        vm.warp(block.timestamp+ interval + 1);
+        vm.roll(block.number+1);
+        raffle.performUpkeep();
+        vm.expectRevert(Raffle.Raffle__RaffleNotOpen.selector);
+        vm.prank(PLAYER);
+        raffle.enterRaffle{value: entranceFee}();
+    }   
+   
 }
